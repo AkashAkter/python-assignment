@@ -1,53 +1,93 @@
-def is_valid_expression(expression):
-    stack = []
-    bracket_pairs = {')': '(', ']': '[', '}': '{'}
-    allowed_chars = set('()[]{}+-*/%0123456789')
+class Calculator:
+    def __init__(self):
+        self.allowed_chars = set('0123456789+-*/%()[]{} ')
+        self.bracket_pairs = {'(': ')', '[': ']', '{': '}'}
     
-    # Check for invalid characters
-    for char in expression:
-        if char not in allowed_chars:
-            return False
-    
-    # Check bracket matching
-    for char in expression:
-        if char in bracket_pairs.values():
-            stack.append(char)
-        elif char in bracket_pairs.keys():
-            if not stack or stack.pop() != bracket_pairs[char]:
+    def is_valid_expression(self, expr):
+        """Verify that the expression has balanced brackets and only permitted characters"""
+        stack = []
+        
+        for char in expr:
+            if char not in self.allowed_chars:
                 return False
+            
+            if char in self.bracket_pairs:
+                stack.append(self.bracket_pairs[char])
+            elif char in self.bracket_pairs.values():
+                if not stack or char != stack.pop():
+                    return False
+        
+        return not stack 
     
-    return len(stack) == 0
+    def evaluate_expression(self, expr):
+        """After validation, safely assess the expression"""
+        try:
+          
+            expr = expr.replace('[', '(').replace(']', ')').replace('{', '(').replace('}', ')')
+            result = eval(expr)
+            return result
+        except ZeroDivisionError:
+            return "Error: Division by zero"
+        except:
+            return "Error: Invalid expression"
+    
+    def display_welcome_message(self):
+        """Display the welcome message and instructions"""
+        print("Here is the Python Calculator.")
+        print("Allowed characters: digits, +, -, *, /, %, (, ), [, ], {, }")
+        print("Type 'end' to exit the program.\n")
+    
+    def get_user_input(self):
+        """Get and validate user input"""
+        while True:
+            expression = input("Enter a mathematical expression: ").strip()
+            
+            if expression.lower() == 'end':
+                return None
+            
+            if not expression:
+                print("Error: Empty input. Please enter a valid expression.")
+                continue
+            
+            if not self.is_valid_expression(expression):
+                print("Error: Invalid input. Only numbers and the permitted operators/brackets should be used.")
+                print("Also check that your brackets are properly balanced.")
+                continue
+            
+            return expression
+    
+    def run(self):
+        """Main method to run the calculator"""
+        self.display_welcome_message()
+        
+        while True:
+            expression = self.get_user_input()
+            
+            if expression is None:
+                print("Goodbye!")
+                break
+            
+            result = self.evaluate_expression(expression)
+            
+            if isinstance(result, str) and result.startswith("Error"):
+                print(result)
+            else:
+                print(f"Result: {result}")
+            
+          
+            while True:
+                choice = input("\nCalculate another expression? (yes/no): ").strip().lower()
+                if choice in ('yes', 'y'):
+                    print()  
+                    break
+                elif choice in ('no', 'n'):
+                    print("Thank you for using the calculator.")
+                    return
+                else:
+                    print("Please enter 'yes' or 'no'.")
 
-def calculate_expression(expression):
-    try:
-        # Replace brackets with parentheses for eval
-        expression = expression.replace('[', '(').replace(']', ')')
-        expression = expression.replace('{', '(').replace('}', ')')
-        return eval(expression)
-    except:
-        return None
 
-def calculator():
-    while True:
-        print("\nCalculator")
-        expression = input("Enter an expression (or 'quit' to exit): ").strip()
-        
-        if expression.lower() == 'quit':
-            break
-        
-        if not is_valid_expression(expression):
-            print("Invalid expression! Please use only digits, +-*/%, and matching brackets ()[]{}")
-            continue
-        
-        result = calculate_expression(expression)
-        if result is not None:
-            print(f"Result: {result}")
-        else:
-            print("Error in calculation. Please check your expression.")
-        
-        continue_calc = input("Continue? (y/n): ").strip().lower()
-        if continue_calc != 'y':
-            break
-
+# Main program
 if __name__ == "__main__":
-    calculator()
+    app = Calculator()
+    app.run()
